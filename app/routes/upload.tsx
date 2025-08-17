@@ -35,7 +35,7 @@ const Upload = () => {
                             </div>
                             <div className='form-div'>
                                 <label htmlFor='job-title'>Job Title</label>
-                                <input type='text' name='company-name' placeholder='Company Name' id='company-name' />
+                                <input type='text' name='company-name' placeholder='Job Title' id='company-name' />
                             </div>
                             <div className='form-div'>
                                 <label htmlFor='job-description'>Job Description</label>
