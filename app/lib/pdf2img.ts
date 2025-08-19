@@ -33,15 +33,12 @@ export async function convertPdfToImage(
 
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await lib.getDocument({ data: arrayBuffer }).promise;
-        // Checking for error:
-        console.log("PDF loaded, total pages:", pdf.numPages);
+
         const page = await pdf.getPage(1);
-        // Checking for error:
-        console.log("Got page 1");
+
 
         const viewport = page.getViewport({ scale: 4 });
-        // Checking for error:
-        console.log("Viewport:", viewport.width, viewport.height);
+
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d");
         // Checking for error:
@@ -64,10 +61,8 @@ export async function convertPdfToImage(
             context.imageSmoothingQuality = "high";
         }
 
-        // Checking for error:
-        console.log("Rendering page...");
+
         await page.render({ canvasContext: context!, viewport }).promise;
-        console.log("Page rendered, creating blob...");
 
         return new Promise((resolve) => {
             canvas.toBlob(
@@ -89,8 +84,7 @@ export async function convertPdfToImage(
                             file: null,
                             error: "Failed to create image blob",
                         });
-                    } // Checking error:
-                    console.log("Rendering done, creating blob...");
+                    }
                 },
                 "image/png",
                 1.0
