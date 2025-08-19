@@ -7,12 +7,45 @@ import {convertPdfToImage} from "~/lib/pdf2img";
 import {generateUUID} from "~/lib/utils";
 import {prepareInstructions} from "../../constants";
 
+// async function listAvailableModels() {
+//     try {
+//         const response = await puter.ai.listModels();
+//         console.log("Full response:", response);
+//     } catch (err) {
+//         console.error("Error fetching models:", err);
+//     }
+// }
+//
+// listAvailableModels();
+
+
 const Upload = () => {
     const { auth, isLoading, fs, ai, kv } = usePuterStore();
     const navigate = useNavigate();
     const [isProcessing, setIsProcessing] = useState(false);
     const [statusText, setStatusText] = useState('');
     const [file, setFile] = useState<File | null>(null);
+
+    async function normalizeToRealFile(file: any): Promise<File> {
+        // Case 1: Already a real browser File (has arrayBuffer method)
+        if (file instanceof File && typeof file.arrayBuffer === "function") {
+            return file;
+        }
+
+        // Case 2: Puter/Electron style "File" with path
+        if (file.path) {
+            // Try to fetch it back from the path
+            // (adjust if fs exposes a download/read API instead of fetch)
+            const response = await fetch(file.path.startsWith("http") ? file.path : `/${file.path}`);
+            if (!response.ok) throw new Error(`Failed to fetch file from path: ${file.path}`);
+
+            const blob = await response.blob();
+            return new File([blob], file.name || "resume.pdf", { type: "application/pdf" });
+        }
+
+        throw new Error("Unsupported file object passed to normalizeToRealFile");
+    }
+
 
     const handleFileSelect = (file: File | null) => {
         setFile(file);
@@ -26,8 +59,12 @@ const Upload = () => {
         if(!uploadedFile) return setStatusText('Error: Failed to upload file');
 
         setStatusText('Converting to image...');
-        const imageFile = await convertPdfToImage(file);
-        if(!imageFile.file) return setStatusText('Error: Failed to convert PDF to image');
+        const realFile = await normalizeToRealFile(file);
+        console.log("Using normalized file:", realFile);
+
+        const imageFile = await convertPdfToImage(realFile);
+        if (!imageFile.file) return setStatusText(imageFile.error || 'Error: Failed to convert PDF to image');
+
 
         setStatusText('Uploading the image...');
         const uploadedImage = await fs.upload([imageFile.file]);
@@ -75,6 +112,8 @@ const Upload = () => {
 
         if (!file) return;
 
+        /// Checking for error:
+        console.log("File in handleAnalyze:", file);
         handleAnalyze({ companyName, jobTitle, jobDescription, file });
     }
 

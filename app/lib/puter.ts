@@ -339,19 +339,16 @@ export const usePuterStore = create<PuterStore>((set, get) => {
                 {
                     role: "user",
                     content: [
-                        {
-                            type: "file",
-                            puter_path: path,
-                        },
-                        {
-                            type: "text",
-                            text: message,
-                        },
+                        // { type: "file", puter_path: path },
+                        { type: "text", text: message },
                     ],
                 },
             ],
-            { model: "claude-3-7-sonnet" }
+            undefined, // no image URL
+            undefined, // no testMode
+            { model: "gpt-4o-mini" } // this is the options argument
         ) as Promise<AIResponse | undefined>;
+
     };
 
     const img2txt = async (image: string | File | Blob, testMode?: boolean) => {

@@ -33,11 +33,28 @@ export async function convertPdfToImage(
 
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await lib.getDocument({ data: arrayBuffer }).promise;
+        // Checking for error:
+        console.log("PDF loaded, total pages:", pdf.numPages);
         const page = await pdf.getPage(1);
+        // Checking for error:
+        console.log("Got page 1");
 
         const viewport = page.getViewport({ scale: 4 });
+        // Checking for error:
+        console.log("Viewport:", viewport.width, viewport.height);
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d");
+        // Checking for error:
+        if (!context) {
+            throw new Error("Failed to get 2D context from canvas");
+        }
+
+        // Checking for error:
+        if (!(file instanceof File)) {
+            throw new Error("convertPdfToImage received a non-File object: " + typeof file);
+        }
+        // Checking for error:
+        console.log("convertPdfToImage called with:", file.name);
 
         canvas.width = viewport.width;
         canvas.height = viewport.height;
@@ -47,7 +64,10 @@ export async function convertPdfToImage(
             context.imageSmoothingQuality = "high";
         }
 
+        // Checking for error:
+        console.log("Rendering page...");
         await page.render({ canvasContext: context!, viewport }).promise;
+        console.log("Page rendered, creating blob...");
 
         return new Promise((resolve) => {
             canvas.toBlob(
@@ -69,7 +89,8 @@ export async function convertPdfToImage(
                             file: null,
                             error: "Failed to create image blob",
                         });
-                    }
+                    } // Checking error:
+                    console.log("Rendering done, creating blob...");
                 },
                 "image/png",
                 1.0
@@ -79,7 +100,8 @@ export async function convertPdfToImage(
         return {
             imageUrl: "",
             file: null,
-            error: `Failed to convert PDF: ${err}`,
+            /// Checking error:
+            error: `Failed to convert PDF: ${err instanceof Error ? err.message : JSON.stringify(err)}`
         };
     }
 }
