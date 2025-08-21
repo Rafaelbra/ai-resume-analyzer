@@ -2,7 +2,6 @@ import {Link, useNavigate, useParams} from "react-router";
 import {useEffect, useState} from "react";
 import {usePuterStore} from "~/lib/puter";
 import Summary from "~/components/Summary";
-import Ats from "~/components/ATS";
 import Details from "~/components/Details";
 import ATS from "~/components/ATS";
 
